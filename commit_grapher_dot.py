@@ -1,13 +1,12 @@
 from git import Repo
 import graphviz
 
-class Grapher(object):
+from grapher import Grapher
+
+class DotGrapher(Grapher):
 	"""Uses dot to create graph of labelled commits."""
 	def __init__(self, labels):
-		super(Grapher, self).__init__()
-		self.commits = labels.keys()
-		self.labels = labels
-		self.graph = None
+		super(DotGrapher, self).__init__(labels)
 
 	def make_graph(self):
 		self.graph = graphviz.Digraph('G', filename='test.gv')
@@ -35,25 +34,13 @@ class Grapher(object):
 	def render_graph(self, fname, view=False):
 		self.graph.render(fname, view=view)
 
-	def get_color(self, label):
-		if label == 'development':
-			return 'green'
-		if label.startswith('fg-'):
-			return 'orange'
-		if label.startswith('f-'):
-			return 'red'
-		return 'lightgrey'
-
-	def display_name(self, commit):
-		return "{hash}\n{name}".format(hash=commit.hexsha[:8], name=commit.name_rev.split()[-1])
-
 if __name__ == '__main__':
 	import commit_labeler
 	import sys
 	labeler = commit_labeler.Labeler()
 	repo = Repo(sys.argv[1])
 	labeler.label_commits(repo)
-	grapher = Grapher(labeler.labels)
+	grapher = DotGrapher(labeler.labels)
 	grapher.make_graph()
 	print grapher.graph.source
 	grapher.render_graph('test.gv', True)
